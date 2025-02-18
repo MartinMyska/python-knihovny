@@ -5,6 +5,7 @@ def obrat_slovnik(slovnik):
     ...
 
 
+
 # Napoveda:
 def napoveda(iterable1, iterable2):
     # dict comprehension:
