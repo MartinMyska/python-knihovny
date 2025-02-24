@@ -23,3 +23,5 @@
 #
 # Pro tento pokročilý způsob je však třeba použít pokročilou knihovnu pro práci
 # s parametry příkazové řádky, jako např. argparse nebo click.
+
+#
