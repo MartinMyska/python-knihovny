@@ -24,8 +24,8 @@
 # Pro tento pokročilý způsob je však třeba použít pokročilou knihovnu pro práci
 # s parametry příkazové řádky, jako např. argparse nebo click.
 
-import sys
 import os
+import argparse
 
 
 def get_acc_balance(path_to_account: str):
@@ -55,50 +55,30 @@ def set_new_acc_balance(path_to_account: str, new_balance: float):
         account.write(str(new_balance))
 
 
-from_param_name = "--from"
-to_param_name = "--to"
-amount_param_name = "--amount"
-
-# get all terminal params
-transaction_order = sys.argv
-
-# check for existence of correctly named params
-if (len(transaction_order) != 7
-   or from_param_name not in transaction_order
-   or to_param_name not in transaction_order
-   or amount_param_name not in transaction_order):
-    exit(f"Usage: {sys.argv[0]} --from <sender_account> --to <recipient_account> --amount <transferred_amount>")
-
-# figure position of each param
-from_index = transaction_order.index(from_param_name) + 1
-to_index = transaction_order.index(to_param_name) + 1
-amount_index = transaction_order.index(amount_param_name) + 1
-
-# get account numbers and transferred amount
-sender_acc_no = transaction_order[from_index]
-recipient_acc_no = transaction_order[to_index]
-try:
-    amount_transferred = float(transaction_order[amount_index])
-except ValueError:
-    exit("Transferred amount not valid number")
+#  get transaction arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("--from", dest="from_account", required=True, type=str)
+parser.add_argument("--to", dest="to_account", required=True, type=str)
+parser.add_argument("--amount", required=True, type=float)
+tran_args = parser.parse_args()
 
 # transfers from to same account illegal
-if sender_acc_no == recipient_acc_no:
+if tran_args.from_account == tran_args.to_account:
     exit("Own transfers not allowed")
 
 # check for burglars
-if amount_transferred < 0:
+if tran_args.amount < 0:
     exit("Trying to steal money?")
 
 # get ballance from both accounts
 bank_path = "02/banka/"
-sender_original_balance = get_acc_balance(os.path.join(bank_path, sender_acc_no))
-recipient_original_balance = get_acc_balance(os.path.join(bank_path, recipient_acc_no))
+sender_original_balance = get_acc_balance(os.path.join(bank_path, tran_args.from_account))
+recipient_original_balance = get_acc_balance(os.path.join(bank_path, tran_args.to_account))
 
 # check for sufficient account balance
-if sender_original_balance - amount_transferred < 0:
-    exit(f"Transaction denied! No sufficient funds on account {sender_acc_no}")
+if sender_original_balance - tran_args.amount < 0:
+    exit(f"Transaction denied! No sufficient funds on account {tran_args.from_account}")
 
 # set new account balance
-set_new_acc_balance(f"02/banka/{sender_acc_no}", sender_original_balance - amount_transferred)
-set_new_acc_balance(f"02/banka/{recipient_acc_no}", recipient_original_balance + amount_transferred)
+set_new_acc_balance(os.path.join(bank_path, tran_args.from_account), sender_original_balance - tran_args.amount)
+set_new_acc_balance(os.path.join(bank_path, tran_args.to_account), recipient_original_balance + tran_args.amount)
