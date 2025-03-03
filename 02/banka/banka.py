@@ -25,6 +25,7 @@
 # s parametry příkazové řádky, jako např. argparse nebo click.
 
 import sys
+import os
 
 
 def get_acc_balance(path_to_account: str):
@@ -59,7 +60,7 @@ to_param_name = "--to"
 amount_param_name = "--amount"
 
 # get all terminal params
-transaction_order = sys.argv[:]
+transaction_order = sys.argv
 
 # check for existence of correctly named params
 if (len(transaction_order) != 7
@@ -90,8 +91,9 @@ if amount_transferred < 0:
     exit("Trying to steal money?")
 
 # get ballance from both accounts
-sender_original_balance = get_acc_balance(f"02/banka/{sender_acc_no}")
-recipient_original_balance = get_acc_balance(f"02/banka/{recipient_acc_no}")
+bank_path = "02/banka/"
+sender_original_balance = get_acc_balance(os.path.join(bank_path, sender_acc_no))
+recipient_original_balance = get_acc_balance(os.path.join(bank_path, recipient_acc_no))
 
 # check for sufficient account balance
 if sender_original_balance - amount_transferred < 0:
